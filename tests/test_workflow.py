@@ -26,6 +26,21 @@ class WorkflowTests(unittest.TestCase):
             list(tasks),
             ["architect", "backend", "frontend", "testing", "security", "chapter"],
         )
+        testing_agent = tasks["testing"].agent
+        for section in (
+            "Resumen para Security y Chapter",
+            "Trazabilidad",
+            "Casos de prueba",
+            "Contrato de API",
+            "Persistencia",
+            "Correcciones verificadas",
+            "Comandos y entorno",
+            "NO EJECUTADO",
+        ):
+            self.assertIn(section, testing_agent.goal + testing_agent.backstory)
+        self.assertEqual(tasks["testing"].expected_output, "Un informe de pruebas.")
+        self.assertIn("Entrega testing_report.md", tasks["testing"].description)
+        self.assertIn("archivos de prueba Java/TypeScript", tasks["testing"].description)
         for role in ROLES:
             self.assertIs(tasks[role.KEY].agent, role.agent)
             self.assertIn("Transfer funds", tasks[role.KEY].description)
@@ -44,6 +59,32 @@ class WorkflowTests(unittest.TestCase):
         with patch.dict("os.environ", {"CREWAI_INCLUDE_DATA": "maybe"}):
             with self.assertRaises(ValueError):
                 include_data()
+
+    def test_checkpoint_round_trip_preserves_step_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            checkpoint_file = Path(tmp) / ".checkpoint.json"
+            with patch.object(app, "CHECKPOINT_FILE", checkpoint_file):
+                checkpoint = {
+                    "workflow_mode": "six",
+                    "feature_title": "Transfer funds",
+                    "steps": {
+                        "backend": {
+                            "status": "approved",
+                            "output": "BalanceService output",
+                        }
+                    },
+                }
+
+                app.save_checkpoint(checkpoint)
+
+                self.assertEqual(app.load_checkpoint(), checkpoint)
+
+    def test_invalid_checkpoint_starts_with_empty_steps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            checkpoint_file = Path(tmp) / ".checkpoint.json"
+            checkpoint_file.write_text("{invalid json", encoding="utf-8")
+            with patch.object(app, "CHECKPOINT_FILE", checkpoint_file):
+                self.assertEqual(app.load_checkpoint(), {"steps": {}})
 
     def test_data_retry_rejection_and_resume_keep_human_gate(self):
         self.check_pipeline(True, interrupt_data=True)
