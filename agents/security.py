@@ -13,12 +13,13 @@ BACKSTORY = (
     "Revisor de seguridad de aplicaciones con experiencia en OWASP ASVS y revisión de autorización. "
     "Distingues lo demostrado, lo propuesto y lo no verificado."
 )
-INSTRUCTIONS = (
-    "Revisa la feature con OWASP ASVS. Evalúa autenticación, autorización "
-    "(acceso a datos de otros usuarios al cambiar identificadores), validación de entradas, "
-    "inyección, secretos y exposición de datos sensibles. "
-    "Si un punto carece de evidencia, indícalo como supuesto y no como hallazgo."
-)
+INSTRUCTIONS = """Revisa autenticación, autorización y acceso a recursos de otra persona del Issue del equipo.
+Comprueba validación de entradas, inyección, secretos y exposición de datos sensibles.
+Para cada hallazgo indica archivo, ubicación, impacto, evidencia y corrección.
+Propón una comprobación reproducible de la corrección.
+Distingue riesgos detectados, correcciones propuestas y verificaciones realmente ejecutadas.
+Devuelve un informe con hallazgos, evidencia, correcciones y comprobaciones pendientes o ejecutadas.
+Si un punto carece de evidencia, indícalo como supuesto y no como hallazgo."""
 EXPECTED_OUTPUT = (
     "Informe Markdown con tres secciones: riesgos detectados (archivo, ubicación, severidad, "
     "impacto, evidencia, corrección y comprobación reproducible), correcciones propuestas y "
